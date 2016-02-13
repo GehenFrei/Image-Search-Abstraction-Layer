@@ -14,6 +14,7 @@ module.exports = function (app) {
         var serchTerm  = req.params.search.replace(" ", "%20");
         var offset = req.query.offset || 10;
         var bingSearch = new BingSearch(process.env.API_KEY);
+        Database.logSearch(serchTerm);
         Database.findQuery(serchTerm,function(databaseResult) {
             if (databaseResult.length != 0) {
                 response.json(databaseResult[0].results.slice(0, offset));
@@ -38,10 +39,20 @@ module.exports = function (app) {
             });
     });
     
+    app.route("/api/latest/imagesearch/").get(function(req, res) {
+        Database.getHistory(function(result) {
+            res.json(result)
+        })
+    })
     
+    
+    app.route("/").get(function(req, res, next) {
+        res.render('index', {"baseUrl": process.env.APP_URL});
+    });
+    
+
     app.route("*").get(function(req, res, next) {
         res.sendStatus(404);
     })
 
-
-}
+};
